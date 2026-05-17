@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BackpackDiaries — Capture journeys, memories, and adventures.</title>
+
+  <!-- Google Fonts: Playfair Display + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =============================================
+       CSS CUSTOM PROPERTIES (THEME TOKENS)
+    ============================================= */
+    :root {
+      --sand:       #f5ede0;
+      --parchment:  #ede0cc;
+      --cream:      #fdf8f2;
+      --terracotta: #c1643c;
+      --terra-dark: #9a4c2c;
+      --terra-light:#e8896a;
+      --forest:     #3d5a40;
+      --forest-mid: #4e7353;
+      --ink:        #1e1a16;
+      --ink-mid:    #3d3529;
+      --muted:      #7a6f63;
+      --border:     rgba(30,26,22,.12);
+      --shadow-sm:  0 2px 12px rgba(30,26,22,.08);
+      --shadow-md:  0 8px 32px rgba(30,26,22,.14);
+      --shadow-lg:  0 20px 60px rgba(30,26,22,.18);
+      --radius-sm:  8px;
+      --radius-md:  16px;
+      --radius-lg:  28px;
+      --nav-h:      68px;
+      --ff-display: 'Playfair Display', Georgia, serif;
+      --ff-body:    'DM Sans', system-ui, sans-serif;
+      --transition: .35s cubic-bezier(.25,.8,.25,1);
+    }
+
+    /* Dark theme overrides */
+    [data-theme="dark"] {
+      --sand:       #1e1a16;
+      --parchment:  #2a2420;
+      --cream:      #14110e;
+      --terracotta: #e8896a;
+      --terra-dark: #f0a882;
+      --terra-light:#c1643c;
+      --forest:     #6aac6f;
+      --forest-mid: #4e8a53;
+      --ink:        #f5ede0;
+      --ink-mid:    #d4c8b8;
+      --muted:      #9a8f83;
+      --border:     rgba(245,237,224,.1);
+      --shadow-sm:  0 2px 12px rgba(0,0,0,.3);
+      --shadow-md:  0 8px 32px rgba(0,0,0,.4);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,.5);
+    }
+
+    /* =============================================
+       RESET & BASE
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: var(--ff-body);
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+      overflow-x: hidden;
+    }
+
+    img { display: block; width: 100%; object-fit: cover; }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* =============================================
+       NAVIGATION
+    ============================================= */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+      background: rgba(253,248,242,.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+
+    [data-theme="dark"] nav {
+      background: rgba(20,17,14,.88);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--ff-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -.01em;
+    }
+
+    .nav-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--terracotta);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+    }
+
+    .nav-logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: .875rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color var(--transition);
+    }
+
+    .nav-links a:hover { color: var(--terracotta); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 44px; height: 44px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: border-color var(--transition), background var(--transition);
+      color: var(--ink);
+    }
+
+    .theme-toggle:hover { background: var(--parchment); }
+    .theme-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+    /* Hamburger (mobile) */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--ink);
+      border-radius: 2px;
+      transition: transform .3s, opacity .3s;
+    }
+
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    /* Mobile nav drawer */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: var(--nav-h); left: 0; right: 0;
+      background: var(--cream);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 5vw;
+      flex-direction: column;
+      gap: 1.25rem;
+      z-index: 99;
+      animation: slideDown .25s ease;
+    }
+
+    .mobile-menu.open { display: flex; }
+
+    .mobile-menu a {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--ink-mid);
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =============================================
+       BUTTONS
+    ============================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .7rem 1.6rem;
+      border-radius: 100px;
+      font-family: var(--ff-body);
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+
+    .btn:active { transform: scale(.97); }
+
+    .btn-primary {
+      background: var(--terracotta);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(193,100,60,.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--terra-dark);
+      box-shadow: 0 6px 24px rgba(193,100,60,.45);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      background: var(--parchment);
+      border-color: var(--muted);
+      transform: translateY(-2px);
+    }
+
+    /* =============================================
+       SECTION SHELL
+    ============================================= */
+    section { padding: 6rem 5vw; }
+
+    .container { max-width: 1160px; margin: 0 auto; }
+
+    .section-label {
+      display: inline-block;
+      font-size: .78rem;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--terracotta);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--ff-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 1.1rem;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 540px;
+      line-height: 1.7;
+    }
+
+    /* =============================================
+       HERO SECTION
+    ============================================= */
+    .hero {
+      min-height: 100vh;
+      padding: 0 5vw;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Layered background gradient — warm dusk travel feel */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 50%, rgba(193,100,60,.18) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 70% at 20% 80%, rgba(61,90,64,.15) 0%, transparent 55%),
+        linear-gradient(160deg, #fdf8f2 0%, #f5ede0 60%, #ede0cc 100%);
+      transition: background var(--transition);
+    }
+
+    [data-theme="dark"] .hero::before {
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 50%, rgba(232,137,106,.12) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 70% at 20% 80%, rgba(106,172,111,.1) 0%, transparent 55%),
+        linear-gradient(160deg, #14110e 0%, #1e1a16 60%, #2a2420 100%);
+    }
+
+    /* Decorative map-pin grid pattern */
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(193,100,60,.12) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      opacity: .6;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      max-width: 1160px;
+      margin: 0 auto;
+      width: 100%;
+      padding-top: var(--nav-h);
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(193,100,60,.12);
+      border: 1px solid rgba(193,100,60,.25);
+      border-radius: 100px;
+      padding: .4rem 1rem;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--terracotta);
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+    }
+
+    .hero-tag-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(1.4); }
+    }
+
+    .hero-title {
+      font-family: var(--ff-display);
+      font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      margin-bottom: 1.25rem;
+      animation: fadeUp .7s .1s ease both;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+
+    .hero-tagline {
+      font-size: 1.15rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 2.25rem;
+      animation: fadeUp .7s .2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      animation: fadeUp .7s .3s ease both;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 3rem;
+      animation: fadeUp .7s .4s ease both;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-family: var(--ff-display);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    /* Hero visual — stacked journal cards */
+    .hero-visual {
+      position: relative;
+      height: 480px;
+      animation: fadeUp .8s .2s ease both;
+    }
+
+    .journal-card {
+      position: absolute;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+
+    .journal-card-main {
+      width: 320px; height: 380px;
+      top: 40px; left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      background: var(--parchment);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .journal-card-photo {
+      flex: 1;
+      background: linear-gradient(135deg, #c1643c 0%, #9a4c2c 50%, #3d5a40 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* SVG mountain silhouette inside hero card */
+    .journal-card-photo::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 60%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 120'%3E%3Cpath d='M0 120 L0 80 L60 30 L120 70 L180 20 L240 60 L280 10 L320 50 L320 120 Z' fill='rgba(0,0,0,.3)'/%3E%3C/svg%3E") no-repeat bottom / cover;
+    }
+
+    .journal-card-body {
+      padding: 1.1rem;
+      background: var(--parchment);
+    }
+
+    .journal-card-body h4 {
+      font-family: var(--ff-display);
+      font-size: 1rem;
+      color: var(--ink);
+      margin-bottom: .25rem;
+    }
+
+    .journal-card-body p {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .journal-card-sm1 {
+      width: 180px; height: 220px;
+      top: 0; right: 10px;
+      transform: rotate(4deg);
+      background: linear-gradient(135deg, #4e7353 0%, #3d5a40 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .journal-card-sm1-inner {
+      padding: .9rem;
+      background: linear-gradient(transparent, rgba(0,0,0,.55));
+      width: 100%;
+      border-radius: var(--radius-sm);
+    }
+
+    .journal-card-sm1-inner p {
+      font-size: .75rem;
+      color: rgba(255,255,255,.9);
+      font-family: var(--ff-display);
+    }
+
+    .journal-card-sm2 {
+      width: 150px; height: 150px;
+      bottom: 10px; left: 0;
+      transform: rotate(2deg);
+      background: linear-gradient(135deg, #e8896a 0%, #c1643c 100%);
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius-sm);
+    }
+
+    .journal-card-sm2 span {
+      font-family: var(--ff-display);
+      font-size: 1.1rem;
+      color: #fff;
+      text-align: center;
+      padding: .75rem;
+      line-height: 1.3;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =============================================
+       ABOUT SECTION
+    ============================================= */
+    #about {
+      background: var(--parchment);
+      transition: background var(--transition);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .about-img-wrap {
+      position: relative;
+    }
+
+    .about-img-frame {
+      width: 100%;
+      aspect-ratio: 4/3;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: linear-gradient(145deg, #3d5a40 0%, #c1643c 100%);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    /* SVG compass rose decorative overlay */
+    .about-img-frame::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem; right: -1rem;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: var(--cream);
+      box-shadow: var(--shadow-md);
+      display: block;
+    }
+
+    .about-badge {
+      position: absolute;
+      bottom: .5rem; right: .5rem;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--terracotta);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 2;
+    }
+
+    .about-badge span:first-child {
+      font-family: var(--ff-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .about-badge span:last-child {
+      font-size: .6rem;
+      color: rgba(255,255,255,.8);
+      text-align: center;
+      line-height: 1.2;
+      padding: 0 6px;
+    }
+
+    .about-list {
+      margin-top: 1.75rem;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+
+    .about-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: .85rem;
+      font-size: .95rem;
+      color: var(--ink-mid);
+    }
+
+    .about-list-icon {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(193,100,60,.12);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .about-list-icon svg {
+      width: 14px; height: 14px;
+      fill: var(--terracotta);
+    }
+
+    /* SVG landscape inside about frame */
+    .about-landscape {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* =============================================
+       FEATURES SECTION
+    ============================================= */
+    .features-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .features-header .section-sub { margin: 0 auto; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 2rem 1.75rem;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    [data-theme="dark"] .feature-card { background: var(--parchment); }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--terracotta), var(--forest));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+      border-color: rgba(193,100,60,.25);
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      background: rgba(193,100,60,.1);
+      display: grid;
+      place-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-icon svg {
+      width: 24px; height: 24px;
+      stroke: var(--terracotta);
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    .feature-card h3 {
+      font-family: var(--ff-display);
+      font-size: 1.15rem;
+      color: var(--ink);
+      margin-bottom: .5rem;
+    }
+
+    .feature-card p {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* =============================================
+       DESTINATIONS SECTION
+    ============================================= */
+    #destinations { background: var(--parchment); transition: background var(--transition); }
+
+    .destinations-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .destinations-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .dest-card {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 3/4;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .dest-card:hover {
+      transform: scale(1.03);
+      box-shadow: var(--shadow-md);
+    }
+
+    .dest-card-bg {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Gradient overlays per card */
+    .dest-card:nth-child(1) .dest-card-bg { background: linear-gradient(160deg, #3d5a40 0%, #c1643c 100%); }
+    .dest-card:nth-child(2) .dest-card-bg { background: linear-gradient(160deg, #7a5c3a 0%, #3d5a40 100%); }
+    .dest-card:nth-child(3) .dest-card-bg { background: linear-gradient(160deg, #c1643c 0%, #9a4c2c 100%); }
+
+    .dest-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 55%);
+    }
+
+    /* Minimal SVG scenery per card */
+    .dest-svg {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      opacity: .65;
+    }
+
+    .dest-card-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.5rem;
+      z-index: 2;
+    }
+
+    .dest-card-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 100px;
+      padding: .2rem .75rem;
+      font-size: .7rem;
+      color: rgba(255,255,255,.9);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+
+    .dest-card-info h3 {
+      font-family: var(--ff-display);
+      font-size: 1.4rem;
+      color: #fff;
+      margin-bottom: .3rem;
+    }
+
+    .dest-card-info p {
+      font-size: .8rem;
+      color: rgba(255,255,255,.75);
+    }
+
+    /* =============================================
+       STORIES / TESTIMONIALS
+    ============================================= */
+    .stories-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .story-card {
+      background: var(--parchment);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      transition: box-shadow var(--transition);
+    }
+
+    [data-theme="dark"] .story-card { background: var(--sand); }
+
+    .story-card:hover { box-shadow: var(--shadow-md); }
+
+    .story-quote {
+      font-family: var(--ff-display);
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--ink-mid);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .story-quote::before { content: '\201C'; color: var(--terracotta); font-size: 2rem; line-height: 0; vertical-align: -.4em; margin-right: 3px; }
+
+    .story-meta {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+    }
+
+    .story-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--ff-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .av-a { background: linear-gradient(135deg, var(--terracotta), var(--terra-dark)); }
+    .av-b { background: linear-gradient(135deg, var(--forest), var(--forest-mid)); }
+    .av-c { background: linear-gradient(135deg, #7a5c3a, #c1643c); }
+
+    .story-meta-text p:first-child {
+      font-weight: 500;
+      font-size: .9rem;
+      color: var(--ink);
+    }
+
+    .story-meta-text p:last-child {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .story-stars {
+      margin-bottom: .85rem;
+      display: flex;
+      gap: 3px;
+    }
+
+    .star {
+      width: 12px; height: 12px;
+      fill: #f5a623;
+    }
+
+    /* =============================================
+       GALLERY SECTION
+    ============================================= */
+    #gallery { background: var(--parchment); transition: background var(--transition); }
+
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .gallery-header .section-sub { margin: 0 auto; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: auto auto;
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform var(--transition);
+    }
+
+    .gallery-item:hover { transform: scale(1.03); }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .gallery-item:nth-child(1) { grid-row: 1 / span 2; }
+    .gallery-item:nth-child(5) { grid-column: 2 / span 2; }
+
+    .gallery-item-bg {
+      aspect-ratio: 1;
+      display: block;
+    }
+
+    .gallery-item:nth-child(1) .gallery-item-bg { aspect-ratio: unset; height: 100%; }
+
+    .gallery-item:nth-child(1) .gallery-item-bg { background: linear-gradient(160deg, #c1643c 0%, #9a4c2c 100%); }
+    .gallery-item:nth-child(2) .gallery-item-bg { background: linear-gradient(160deg, #3d5a40 0%, #4e7353 100%); }
+    .gallery-item:nth-child(3) .gallery-item-bg { background: linear-gradient(160deg, #7a5c3a 0%, #9a4c2c 100%); }
+    .gallery-item:nth-child(4) .gallery-item-bg { background: linear-gradient(160deg, #4e7353 0%, #3d5a40 100%); }
+    .gallery-item:nth-child(5) .gallery-item-bg { background: linear-gradient(160deg, #c1643c 0%, #7a5c3a 100%); aspect-ratio: 2/1; }
+    .gallery-item:nth-child(6) .gallery-item-bg { background: linear-gradient(160deg, #9a4c2c 0%, #c1643c 100%); }
+
+    /* Scenery SVG overlays */
+    .gallery-item-bg { position: relative; }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(193,100,60,.5);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .gallery-overlay svg {
+      width: 28px; height: 28px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* =============================================
+       CTA SECTION
+    ============================================= */
+    .cta-section {
+      background: linear-gradient(135deg, var(--terracotta) 0%, var(--terra-dark) 100%);
+      text-align: center;
+      padding: 6rem 5vw;
+    }
+
+    .cta-section .section-title { color: #fff; }
+
+    .cta-section .section-sub {
+      color: rgba(255,255,255,.75);
+      margin: 0 auto 2.5rem;
+    }
+
+    .cta-section .btn-outline {
+      color: #fff;
+      border-color: rgba(255,255,255,.45);
+    }
+
+    .cta-section .btn-outline:hover {
+      background: rgba(255,255,255,.15);
+      border-color: #fff;
+    }
+
+    /* =============================================
+       CONTACT / FOOTER
+    ============================================= */
+    footer {
+      background: var(--ink);
+      color: rgba(245,237,224,.7);
+      padding: 4rem 5vw 2rem;
+      transition: background var(--transition);
+    }
+
+    [data-theme="dark"] footer { background: #0e0b09; }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(245,237,224,.1);
+    }
+
+    .footer-brand .nav-logo { color: var(--sand); margin-bottom: 1rem; }
+
+    .footer-brand p {
+      font-size: .875rem;
+      line-height: 1.7;
+      max-width: 260px;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: .75rem;
+      margin-top: 1.5rem;
+    }
+
+    .social-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(245,237,224,.2);
+      display: grid;
+      place-items: center;
+      transition: border-color var(--transition), background var(--transition);
+      cursor: pointer;
+    }
+
+    .social-btn:hover {
+      border-color: var(--terracotta);
+      background: rgba(193,100,60,.15);
+    }
+
+    .social-btn svg { width: 16px; height: 16px; stroke: var(--sand); fill: none; stroke-width: 1.8; }
+
+    .footer-col h4 {
+      font-size: .8rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-bottom: 1.1rem;
+    }
+
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .footer-col ul a {
+      font-size: .875rem;
+      transition: color var(--transition);
+    }
+
+    .footer-col ul a:hover { color: var(--terracotta); }
+
+    .footer-bottom {
+      max-width: 1160px;
+      margin: 2rem auto 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .8rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-email {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      color: rgba(245,237,224,.6);
+    }
+
+    .footer-email svg { width: 14px; height: 14px; stroke: var(--terracotta); fill: none; stroke-width: 2; }
+
+    /* =============================================
+       SCROLL REVEAL ANIMATION
+    ============================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Staggered delays */
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+    .reveal-d4 { transition-delay: .4s; }
+    .reveal-d5 { transition-delay: .5s; }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 1024px) {
+      .features-grid,
+      .destinations-grid,
+      .stories-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+      .gallery-item:nth-child(1) { grid-row: auto; }
+      .gallery-item:nth-child(5) { grid-column: auto; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .hero-inner { gap: 2.5rem; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding-top: calc(var(--nav-h) + 2rem);
+      }
+
+      .hero-actions { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-visual { display: none; }
+
+      .about-grid { grid-template-columns: 1fr; }
+      .about-img-wrap { order: -1; }
+
+      .features-grid,
+      .destinations-grid,
+      .stories-grid { grid-template-columns: 1fr; }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .gallery-item:nth-child(1) { grid-row: auto; }
+      .gallery-item:nth-child(5) { grid-column: auto; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+
+      .destinations-header { flex-direction: column; align-items: flex-start; }
+
+      section { padding: 4rem 5vw; }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =============================================
+       NAVIGATION
+  ============================================= -->
+  <nav id="navbar">
+    <a href="#hero" class="nav-logo" aria-label="BackpackDiaries home">
+      <div class="nav-logo-icon" aria-hidden="true">
+        <!-- Backpack SVG icon -->
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <rect x="5" y="6" width="10" height="11" rx="2"/>
+          <path d="M7 6 C7 4.34 8.34 3 10 3 C11.66 3 13 4.34 13 6" stroke="#fff" stroke-width="1.4" fill="none"/>
+          <rect x="7.5" y="9.5" width="5" height="3" rx="1" fill="#fff" opacity=".7"/>
+        </svg>
+      </div>
+      BackpackDiaries
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="#about">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#destinations">Destinations</a></li>
+      <li><a href="#stories">Stories</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <!-- Dark/Light toggle -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <!-- Sun icon (shown in light mode) -->
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+          <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon icon (shown in dark mode) -->
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu" role="navigation">
+    <a href="#about" onclick="closeMobileMenu()">About</a>
+    <a href="#features" onclick="closeMobileMenu()">Features</a>
+    <a href="#destinations" onclick="closeMobileMenu()">Destinations</a>
+    <a href="#stories" onclick="closeMobileMenu()">Stories</a>
+    <a href="#gallery" onclick="closeMobileMenu()">Gallery</a>
+    <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+  </div>
+
+  <!-- =============================================
+       HERO SECTION
+  ============================================= -->
+  <section class="hero" id="hero">
+    <div class="hero-inner">
+      <!-- Copy -->
+      <div class="hero-copy">
+        <div class="hero-tag">
+          <span class="hero-tag-dot" aria-hidden="true"></span>
+          Your personal travel companion
+        </div>
+
+        <h1 class="hero-title">
+          Capture every<br>
+          <em>journey, memory</em><br>
+          &amp; adventure.
+        </h1>
+
+        <p class="hero-tagline">
+          BackpackDiaries is where your travels come alive — write, photograph, and relive every corner of the world you've touched.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#features" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Start Exploring
+          </a>
+          <a href="#stories" class="btn btn-outline">View Stories</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-num">50K+</span>
+            <span class="stat-label">Journeys logged</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">120</span>
+            <span class="stat-label">Countries</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">4.9★</span>
+            <span class="stat-label">User rating</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual (desktop only) -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="journal-card journal-card-sm1">
+          <div class="journal-card-sm1-inner">
+            <p>Patagonia, 2024</p>
+          </div>
+        </div>
+        <div class="journal-card journal-card-main">
+          <div class="journal-card-photo"></div>
+          <div class="journal-card-body">
+            <h4>Day 12 — Annapurna Base Camp</h4>
+            <p>Altitude: 4,130 m · 14°C · Partly cloudy</p>
+          </div>
+        </div>
+        <div class="journal-card journal-card-sm2">
+          <span>224<br>Entries</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       ABOUT SECTION
+  ============================================= -->
+  <section id="about">
+    <div class="container about-grid">
+      <!-- Image -->
+      <div class="about-img-wrap reveal">
+        <div class="about-img-frame">
+          <!-- SVG travel illustration inside frame -->
+          <svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+            <rect width="480" height="360" fill="#3d5a40"/>
+            <!-- Sky gradient -->
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c1643c" stop-opacity=".7"/>
+                <stop offset="100%" stop-color="#3d5a40" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="480" height="200" fill="url(#sky)"/>
+            <!-- Mountains -->
+            <polygon points="0,280 80,140 160,280" fill="rgba(0,0,0,.3)"/>
+            <polygon points="80,280 200,100 320,280" fill="rgba(0,0,0,.4)"/>
+            <polygon points="200,280 360,120 480,280" fill="rgba(0,0,0,.3)"/>
+            <!-- Snow caps -->
+            <polygon points="200,100 215,120 185,120" fill="rgba(255,255,255,.8)"/>
+            <polygon points="80,140 92,158 68,158" fill="rgba(255,255,255,.7)"/>
+            <!-- Ground -->
+            <rect y="280" width="480" height="80" fill="rgba(0,0,0,.3)"/>
+            <!-- Stars -->
+            <circle cx="60" cy="40" r="2" fill="#fff" opacity=".8"/>
+            <circle cx="150" cy="25" r="1.5" fill="#fff" opacity=".6"/>
+            <circle cx="280" cy="50" r="2" fill="#fff" opacity=".7"/>
+            <circle cx="400" cy="30" r="1.5" fill="#fff" opacity=".5"/>
+            <!-- Camp fire -->
+            <ellipse cx="240" cy="320" rx="20" ry="5" fill="rgba(193,100,60,.5)"/>
+            <polygon points="235,320 240,295 245,320" fill="#e8896a" opacity=".9"/>
+            <polygon points="232,318 240,298 247,318" fill="#c1643c" opacity=".7"/>
+          </svg>
+        </div>
+        <div class="about-badge">
+          <span>10+</span>
+          <span>Years of wandering</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="reveal reveal-d2">
+        <span class="section-label">About BackpackDiaries</span>
+        <h2 class="section-title">Your travels deserve to be remembered.</h2>
+        <p class="section-sub">
+          BackpackDiaries is a travel diary app built for adventurers, backpackers, and weekend wanderers. Record trips, pin destinations, attach photos, and build a living archive of every place you've ever been.
+        </p>
+
+        <ul class="about-list">
+          <li>
+            <div class="about-list-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16"><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5zm0 6.5C7.17 8.5 6.5 7.83 6.5 7S7.17 5.5 8 5.5 9.5 6.17 9.5 7 8.83 8.5 8 8.5z"/></svg>
+            </div>
+            Log destinations with maps, dates, and personal notes
+          </li>
+          <li>
+            <div class="about-list-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1" stroke="#c1643c" stroke-width="1.5" fill="none"/><path d="M2 6h12" stroke="#c1643c" stroke-width="1.5"/><circle cx="5" cy="4.5" r=".7" fill="#c1643c"/><circle cx="11" cy="4.5" r=".7" fill="#c1643c"/></svg>
+            </div>
+            Build a visual timeline of your adventures year by year
+          </li>
+          <li>
+            <div class="about-list-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="9" rx="1" stroke="#c1643c" stroke-width="1.5" fill="none"/><path d="M2 8l4-3 3 2.5 2-1.5 3 3" stroke="#c1643c" stroke-width="1.2" fill="none"/></svg>
+            </div>
+            Organize photos into beautiful country-based galleries
+          </li>
+          <li>
+            <div class="about-list-icon" aria-hidden="true">
+              <svg viewBox="0 0 16 16"><path d="M13 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1zM5 7h6M5 9.5h4" stroke="#c1643c" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+            </div>
+            Write rich journal entries — even offline
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       FEATURES SECTION
+  ============================================= -->
+  <section id="features">
+    <div class="container">
+      <div class="features-header reveal">
+        <span class="section-label">What's inside</span>
+        <h2 class="section-title">Everything a traveler needs</h2>
+        <p class="section-sub">Six thoughtfully designed tools that turn scattered memories into a cohesive story of your life on the road.</p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Card 1 -->
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" rx="2"/><path d="M8 4v16M4 9h16"/></svg>
+          </div>
+          <h3>Travel Journals</h3>
+          <p>Write free-form diary entries with rich text, dates, mood tags, and location stamps for every day of your trip.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/></svg>
+          </div>
+          <h3>Memory Timeline</h3>
+          <p>Scroll back through a chronological ribbon of all your journeys — filtered by year, season, or destination.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="feature-card reveal reveal-d3">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 11l5-4 4 3 3-2 6 5"/><circle cx="16" cy="9" r="1.5"/></svg>
+          </div>
+          <h3>Photo Gallery</h3>
+          <p>Attach photos to any entry and browse them in a stunning mosaic gallery organized by trip or country.</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="feature-card reveal reveal-d4">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5z"/></svg>
+          </div>
+          <h3>Destination Notes</h3>
+          <p>Save quick notes, tips, local phrases, and must-do lists for every city or region you visit.</p>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="feature-card reveal reveal-d5">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h3>Favourite Places</h3>
+          <p>Bookmark spots you love — restaurants, viewpoints, hidden gems — to share or revisit on your next adventure.</p>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </div>
+          <h3>Offline Entries</h3>
+          <p>No Wi-Fi? No problem. Write entries locally and everything syncs automatically when you're back online.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       DESTINATIONS SECTION
+  ============================================= -->
+  <section id="destinations">
+    <div class="container">
+      <div class="destinations-header">
+        <div class="reveal">
+          <span class="section-label">Explore the world</span>
+          <h2 class="section-title">Popular destinations</h2>
+        </div>
+        <a href="#" class="btn btn-outline reveal">View all →</a>
+      </div>
+
+      <div class="destinations-grid">
+        <!-- Dest 1 -->
+        <div class="dest-card reveal reveal-d1">
+          <div class="dest-card-bg"></div>
+          <svg class="dest-svg" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 120 L40 70 L80 90 L130 40 L180 75 L220 50 L270 80 L300 60 L300 120 Z" fill="rgba(0,0,0,.35)"/>
+          </svg>
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <span class="dest-card-tag">Asia</span>
+            <h3>Nepal</h3>
+            <p>Himalayas, Pokhara, Ancient Temples</p>
+          </div>
+        </div>
+
+        <!-- Dest 2 -->
+        <div class="dest-card reveal reveal-d2">
+          <div class="dest-card-bg"></div>
+          <svg class="dest-svg" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 120 L60 80 L100 95 L150 55 L210 85 L260 60 L300 75 L300 120 Z" fill="rgba(0,0,0,.35)"/>
+          </svg>
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <span class="dest-card-tag">South America</span>
+            <h3>Patagonia</h3>
+            <p>Torres del Paine, Glaciers, Wilderness</p>
+          </div>
+        </div>
+
+        <!-- Dest 3 -->
+        <div class="dest-card reveal reveal-d3">
+          <div class="dest-card-bg"></div>
+          <svg class="dest-svg" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 120 L50 75 L90 85 L140 45 L190 70 L240 55 L300 80 L300 120 Z" fill="rgba(0,0,0,.35)"/>
+          </svg>
+          <div class="dest-card-overlay"></div>
+          <div class="dest-card-info">
+            <span class="dest-card-tag">Europe</span>
+            <h3>Iceland</h3>
+            <p>Northern Lights, Waterfalls, Hot Springs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       STORIES / TESTIMONIALS
+  ============================================= -->
+  <section id="stories">
+    <div class="container">
+      <div class="features-header reveal">
+        <span class="section-label">From the community</span>
+        <h2 class="section-title">Real travel stories</h2>
+        <p class="section-sub">Thousands of wanderers trust BackpackDiaries to hold their most precious memories.</p>
+      </div>
+
+      <div class="stories-grid">
+        <!-- Story 1 -->
+        <div class="story-card reveal reveal-d1">
+          <div class="story-stars" aria-label="5 stars">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="story-quote">I solo-backpacked Southeast Asia for 6 months. BackpackDiaries kept every memory alive — from street food in Bangkok to sunrise over Angkor Wat.</p>
+          <div class="story-meta">
+            <div class="story-avatar av-a" aria-hidden="true">AR</div>
+            <div class="story-meta-text">
+              <p>Amara Roth</p>
+              <p>Visited 14 countries · Berlin, Germany</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Story 2 -->
+        <div class="story-card reveal reveal-d2">
+          <div class="story-stars" aria-label="5 stars">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="story-quote">The offline mode is a game-changer. I was deep in the Andes with zero signal and still wrote every detail of base camp. Synced the moment I got to town.</p>
+          <div class="story-meta">
+            <div class="story-avatar av-b" aria-hidden="true">JM</div>
+            <div class="story-meta-text">
+              <p>Jorge Mendoza</p>
+              <p>Trekker · Bogotá, Colombia</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Story 3 -->
+        <div class="story-card reveal reveal-d3">
+          <div class="story-stars" aria-label="5 stars">
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <p class="story-quote">Looking back at my Japan entries two years later still gives me goosebumps. The photo gallery alone is worth downloading it for. Absolutely beautiful app.</p>
+          <div class="story-meta">
+            <div class="story-avatar av-c" aria-hidden="true">SK</div>
+            <div class="story-meta-text">
+              <p>Suki Kaneko</p>
+              <p>Photographer · Tokyo, Japan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       GALLERY SECTION
+  ============================================= -->
+  <section id="gallery">
+    <div class="container">
+      <div class="gallery-header reveal">
+        <span class="section-label">Your visual diary</span>
+        <h2 class="section-title">A gallery of the world</h2>
+        <p class="section-sub">Every photo tells a story. Every story deserves a beautiful home.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <!-- Item 1 - tall -->
+        <div class="gallery-item reveal">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="200" height="400" fill="#c1643c"/>
+              <polygon points="0,400 50,230 100,300 150,200 200,270 200,400" fill="rgba(0,0,0,.35)"/>
+              <circle cx="100" cy="80" r="30" fill="rgba(255,240,200,.15)"/>
+              <circle cx="100" cy="80" r="20" fill="rgba(255,240,200,.2)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="gallery-item reveal reveal-d1">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="200" height="200" fill="#3d5a40"/>
+              <polygon points="0,200 40,120 80,160 120,90 160,130 200,100 200,200" fill="rgba(0,0,0,.35)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="gallery-item reveal reveal-d2">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="200" height="200" fill="#7a5c3a"/>
+              <rect x="80" y="80" width="40" height="60" fill="rgba(0,0,0,.35)" rx="3"/>
+              <polygon points="75,80 100,50 125,80" fill="rgba(0,0,0,.4)"/>
+              <rect x="0" y="140" width="200" height="60" fill="rgba(0,0,0,.25)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+
+        <!-- Item 4 -->
+        <div class="gallery-item reveal reveal-d3">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="200" height="200" fill="#4e7353"/>
+              <ellipse cx="100" cy="170" rx="80" ry="50" fill="rgba(0,0,0,.3)"/>
+              <line x1="100" y1="170" x2="100" y2="60" stroke="rgba(0,0,0,.4)" stroke-width="8"/>
+              <circle cx="100" cy="55" r="25" fill="rgba(0,0,0,.35)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+
+        <!-- Item 5 - wide -->
+        <div class="gallery-item reveal reveal-d4">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="400" height="200" fill="#c1643c"/>
+              <rect y="120" width="400" height="80" fill="#7a5c3a"/>
+              <path d="M0 120 Q100 80 200 100 Q300 120 400 80 L400 200 L0 200 Z" fill="#9a4c2c" opacity=".6"/>
+              <circle cx="200" cy="60" r="35" fill="rgba(255,220,150,.3)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+
+        <!-- Item 6 -->
+        <div class="gallery-item reveal reveal-d5">
+          <div class="gallery-item-bg">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="200" height="200" fill="#9a4c2c"/>
+              <path d="M0,200 C50,150 100,180 150,140 C175,120 190,150 200,130 L200,200 Z" fill="rgba(0,0,0,.4)"/>
+              <path d="M0,180 C60,160 110,175 160,155 C180,148 195,162 200,155 L200,200 L0,200 Z" fill="rgba(0,0,0,.25)"/>
+            </svg>
+          </div>
+          <div class="gallery-overlay">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       CTA SECTION
+  ============================================= -->
+  <section class="cta-section" id="contact">
+    <div class="container reveal">
+      <span class="section-label" style="color:rgba(255,255,255,.7)">Start today</span>
+      <h2 class="section-title">Your next adventure begins here.</h2>
+      <p class="section-sub">Join thousands of travelers who never let a memory fade. Free to start, forever yours.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="#" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.45)">
+          <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+          Download App
+        </a>
+        <a href="#features" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.45)">
+          See All Features
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       FOOTER
+  ============================================= -->
+  <footer id="footer">
+    <div class="footer-grid">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <div class="nav-logo" style="color:var(--sand)">
+          <div class="nav-logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="6" width="10" height="11" rx="2"/>
+              <path d="M7 6 C7 4.34 8.34 3 10 3 C11.66 3 13 4.34 13 6" stroke="#fff" stroke-width="1.4" fill="none"/>
+              <rect x="7.5" y="9.5" width="5" height="3" rx="1" fill="#fff" opacity=".7"/>
+            </svg>
+          </div>
+          BackpackDiaries
+        </div>
+        <p>Capture journeys, memories, and adventures — one entry at a time. Built for wanderers, by wanderers.</p>
+        <div class="footer-email" style="margin-top:1rem">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8l10 7 10-7"/></svg>
+          hello@backpackdiaries.app
+        </div>
+        <div class="footer-social" aria-label="Social links">
+          <!-- Instagram -->
+          <div class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="rgba(245,237,224,.7)"/></svg>
+          </div>
+          <!-- Twitter/X -->
+          <div class="social-btn" aria-label="Twitter">
+            <svg viewBox="0 0 24 24"><path d="M4 4l16 16M4 20L20 4"/></svg>
+          </div>
+          <!-- YouTube -->
+          <div class="social-btn" aria-label="YouTube">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><polygon points="10,8 16,12 10,16" fill="rgba(245,237,224,.7)"/></svg>
+          </div>
+          <!-- Pinterest -->
+          <div class="social-btn" aria-label="Pinterest">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8c-2.2 0-4 1.8-4 4 0 1.7 1 3.2 2.5 3.8-.1-.4-.1-.9 0-1.3l.6-2.5c-.1-.4-.2-.7-.2-1.1 0-.9.5-1.6 1.2-1.6.6 0 .9.4.9 1 0 .6-.4 1.5-.6 2.3-.2.7.3 1.3 1 1.3 1.2 0 2-1.5 2-3.7 0-1.5-1-2.6-2.9-2.6-2 0-3.2 1.5-3.2 3.1 0 .6.2 1 .5 1.3.1.1.1.2.1.3l-.2.8c0 .2-.2.2-.3.1C8.6 14.2 8 13.2 8 12c0-2.2 1.8-4.4 5.2-4.4 2.8 0 4.6 2 4.6 4.2 0 2.7-1.6 4.9-3.8 4.9-.8 0-1.5-.4-1.7-.9l-.5 2c-.2.6-.6 1.3-1 1.8"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Links -->
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#destinations">Destinations</a></li>
+          <li><a href="#stories">Stories</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Travel Tips</a></li>
+          <li><a href="#">Community</a></li>
+          <li><a href="#">Press Kit</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 BackpackDiaries. All rights reserved.</p>
+      <p style="color:rgba(245,237,224,.4)">Made with wanderlust &amp; care.</p>
+    </div>
+  </footer>
+
+  <!-- =============================================
+       JAVASCRIPT
+  ============================================= -->
+  <script>
+    // ---- DARK / LIGHT MODE TOGGLE ----
+    const html        = document.documentElement;
+    const toggle      = document.getElementById('themeToggle');
+    const iconSun     = toggle.querySelector('.icon-sun');
+    const iconMoon    = toggle.querySelector('.icon-moon');
+
+    // Load saved preference
+    const savedTheme = localStorage.getItem('bd-theme') || 'light';
+    applyTheme(savedTheme);
+
+    toggle.addEventListener('click', () => {
+      const next = html.dataset.theme === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      localStorage.setItem('bd-theme', next);
+    });
+
+    function applyTheme(theme) {
+      html.dataset.theme = theme;
+      if (theme === 'dark') {
+        iconSun.style.display  = 'none';
+        iconMoon.style.display = 'block';
+      } else {
+        iconSun.style.display  = 'block';
+        iconMoon.style.display = 'none';
+      }
+    }
+
+    // ---- MOBILE MENU ----
+    const hamburger  = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = mobileMenu.classList.toggle('open');
+      hamburger.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    // ---- SCROLL REVEAL ----
+    const reveals = document.querySelectorAll('.reveal');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    reveals.forEach(el => observer.observe(el));
+
+    // ---- NAV SHADOW ON SCROLL ----
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar.style.boxShadow = '0 4px 24px rgba(30,26,22,.12)';
+      } else {
+        navbar.style.boxShadow = 'none';
+      }
+    }, { passive: true });
+  </script>
+
+</body>
+</html>
